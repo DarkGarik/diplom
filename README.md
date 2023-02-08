@@ -27,7 +27,7 @@
 ### [Создание облачной инфраструктуры](https://github.com/DarkGarik/diplom/tree/0.1.0)
 
 <details>
-  <summary>Задание</summary>
+  <summary>Задание</summary>  
 
 Для начала необходимо подготовить облачную инфраструктуру в ЯО при помощи [Terraform](https://www.terraform.io/).
 
@@ -52,7 +52,9 @@
 Ожидаемые результаты:
 
 1. Terraform сконфигурирован и создание инфраструктуры посредством Terraform возможно без дополнительных ручных действий.
-2. Полученная конфигурация инфраструктуры является предварительной, поэтому в ходе дальнейшего выполнения задания возможны изменения.
+2. Полученная конфигурация инфраструктуры является предварительной, поэтому в ходе дальнейшего выполнения задания возможны изменения.  
+---
+
 </details>
 
 1. Создание Сервисного аккаунта:  
@@ -93,6 +95,9 @@
 ---
 ### Создание Kubernetes кластера
 
+<details>
+  <summary>Задание</summary> 
+
 На этом этапе необходимо создать [Kubernetes](https://kubernetes.io/ru/docs/concepts/overview/what-is-kubernetes/) кластер на базе предварительно созданной инфраструктуры.   Требуется обеспечить доступ к ресурсам из Интернета.
 
 Это можно сделать двумя способами:
@@ -110,6 +115,57 @@
 1. Работоспособный Kubernetes кластер.
 2. В файле `~/.kube/config` находятся данные для доступа к кластеру.
 3. Команда `kubectl get pods --all-namespaces` отрабатывает без ошибок.
+
+---
+
+</details>
+
+1. Добавил [kluster.tf](terraform/kluster.tf), в котором прописал создание одной мастер ноды и двух воркеров
+2. Установил свежий `kubespray`, подготовил:
+   ```bash
+   git clone https://github.com/kubernetes-sigs/kubespray
+   cd kubespray
+   sudo pip3 install -r requirements.txt
+   cp -rfp inventory/sample inventory/mycluster
+   ```
+3. Подготовил скрипт [generate_inventory.sh](terraform/generate_inventory.sh), который подсмотрел в репозитории ["Автоматизация установки Kubernetes кластера с помощью Kubespray и Terraform в Yandex Cloud"](https://github.com/patsevanton/kubespray_terraform_yandex_cloud)
+4. Написал скрипт [get_conf.sh](terraform/get_conf.sh), который будет забирать конфиг `kubectl` из мастера на локальную машину и подготавливать его.
+5. Далее по шагам разворачиваем с помощью `terraform` виртуальные машины, подготавливаем inventory с помощью скрипта, деплоим `kubernetes` с помощью `kubespray`, копируем конфиг себе на локальную машину, получаем вывод без ошибок команды `kubectl get pods --all-namespaces`:
+```bash
+gorkov@gorkov-big-home:~/homework/diplom$ cd terraform/
+gorkov@gorkov-big-home:~/homework/diplom/terraform$ export YC_TOKEN=$(yc iam create-token)
+gorkov@gorkov-big-home:~/homework/diplom/terraform$ terraform plan
+...
+gorkov@gorkov-big-home:~/homework/diplom/terraform$ terraform apply
+...
+gorkov@gorkov-big-home:~/homework/diplom/terraform$ bash generate_inventory.sh > ../kubespray/inventory/mycluster/inventory.ini 
+gorkov@gorkov-big-home:~/homework/diplom/terraform$ cd ../kubespray/
+gorkov@gorkov-big-home:~/homework/diplom/kubespray$ ansible-playbook -i inventory/mycluster/inventory.ini --become cluster.yml
+...
+gorkov@gorkov-big-home:~/homework/diplom/kubespray$ cd ../terraform/
+gorkov@gorkov-big-home:~/homework/diplom/terraform$ bash get_conf.sh
+gorkov@gorkov-big-home:~/homework/diplom/terraform$ kubectl get pods --all-namespaces
+NAMESPACE     NAME                                       READY   STATUS    RESTARTS       AGE
+kube-system   calico-kube-controllers-7967fb4566-6jsks   1/1     Running   0              110m
+kube-system   calico-node-7qkgl                          1/1     Running   0              111m
+kube-system   calico-node-d2vsv                          1/1     Running   0              111m
+kube-system   calico-node-wk5bm                          1/1     Running   1 (111m ago)   111m
+kube-system   coredns-68868dc95b-zvmlr                   1/1     Running   0              110m
+kube-system   coredns-68868dc95b-zwznz                   1/1     Running   0              110m
+kube-system   dns-autoscaler-7ccd65764f-x4nrl            1/1     Running   0              110m
+kube-system   kube-apiserver-master-1                    1/1     Running   1              114m
+kube-system   kube-controller-manager-master-1           1/1     Running   1              114m
+kube-system   kube-proxy-8fbtb                           1/1     Running   0              112m
+kube-system   kube-proxy-qxqck                           1/1     Running   0              112m
+kube-system   kube-proxy-tb9fp                           1/1     Running   0              112m
+kube-system   kube-scheduler-master-1                    1/1     Running   1              114m
+kube-system   nginx-proxy-worker-1                       1/1     Running   0              111m
+kube-system   nginx-proxy-worker-2                       1/1     Running   0              111m
+kube-system   nodelocaldns-cnxph                         1/1     Running   0              110m
+kube-system   nodelocaldns-qbqvw                         1/1     Running   0              110m
+kube-system   nodelocaldns-xr88f                         1/1     Running   0              110m
+```
+
 
 ---
 ### Создание тестового приложения
