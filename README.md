@@ -93,7 +93,7 @@
    [Конфигурация](terraform/)
 
 ---
-### Создание Kubernetes кластера
+### [Создание Kubernetes кластера](https://github.com/DarkGarik/diplom/tree/0.2.0)
 
 <details>
   <summary>Задание</summary> 
