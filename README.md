@@ -131,44 +131,50 @@
 3. Подготовил скрипт [generate_inventory.sh](terraform/generate_inventory.sh), который подсмотрел в репозитории ["Автоматизация установки Kubernetes кластера с помощью Kubespray и Terraform в Yandex Cloud"](https://github.com/patsevanton/kubespray_terraform_yandex_cloud)
 4. Написал скрипт [get_conf.sh](terraform/get_conf.sh), который будет забирать конфиг `kubectl` из мастера на локальную машину и подготавливать его.
 5. Далее по шагам разворачиваем с помощью `terraform` виртуальные машины, подготавливаем inventory с помощью скрипта, деплоим `kubernetes` с помощью `kubespray`, копируем конфиг себе на локальную машину, получаем вывод без ошибок команды `kubectl get pods --all-namespaces`:
-```bash
-gorkov@gorkov-big-home:~/homework/diplom$ cd terraform/
-gorkov@gorkov-big-home:~/homework/diplom/terraform$ export YC_TOKEN=$(yc iam create-token)
-gorkov@gorkov-big-home:~/homework/diplom/terraform$ terraform plan
-...
-gorkov@gorkov-big-home:~/homework/diplom/terraform$ terraform apply
-...
-gorkov@gorkov-big-home:~/homework/diplom/terraform$ bash generate_inventory.sh > ../kubespray/inventory/mycluster/inventory.ini 
-gorkov@gorkov-big-home:~/homework/diplom/terraform$ cd ../kubespray/
-gorkov@gorkov-big-home:~/homework/diplom/kubespray$ ansible-playbook -i inventory/mycluster/inventory.ini --become cluster.yml
-...
-gorkov@gorkov-big-home:~/homework/diplom/kubespray$ cd ../terraform/
-gorkov@gorkov-big-home:~/homework/diplom/terraform$ bash get_conf.sh
-gorkov@gorkov-big-home:~/homework/diplom/terraform$ kubectl get pods --all-namespaces
-NAMESPACE     NAME                                       READY   STATUS    RESTARTS       AGE
-kube-system   calico-kube-controllers-7967fb4566-6jsks   1/1     Running   0              110m
-kube-system   calico-node-7qkgl                          1/1     Running   0              111m
-kube-system   calico-node-d2vsv                          1/1     Running   0              111m
-kube-system   calico-node-wk5bm                          1/1     Running   1 (111m ago)   111m
-kube-system   coredns-68868dc95b-zvmlr                   1/1     Running   0              110m
-kube-system   coredns-68868dc95b-zwznz                   1/1     Running   0              110m
-kube-system   dns-autoscaler-7ccd65764f-x4nrl            1/1     Running   0              110m
-kube-system   kube-apiserver-master-1                    1/1     Running   1              114m
-kube-system   kube-controller-manager-master-1           1/1     Running   1              114m
-kube-system   kube-proxy-8fbtb                           1/1     Running   0              112m
-kube-system   kube-proxy-qxqck                           1/1     Running   0              112m
-kube-system   kube-proxy-tb9fp                           1/1     Running   0              112m
-kube-system   kube-scheduler-master-1                    1/1     Running   1              114m
-kube-system   nginx-proxy-worker-1                       1/1     Running   0              111m
-kube-system   nginx-proxy-worker-2                       1/1     Running   0              111m
-kube-system   nodelocaldns-cnxph                         1/1     Running   0              110m
-kube-system   nodelocaldns-qbqvw                         1/1     Running   0              110m
-kube-system   nodelocaldns-xr88f                         1/1     Running   0              110m
-```
+   <details>
+   <summary>Консоль:</summary> 
 
+   ```bash
+   gorkov@gorkov-big-home:~/homework/diplom$ cd terraform/
+   gorkov@gorkov-big-home:~/homework/diplom/terraform$ export YC_TOKEN=$(yc iam create-token)
+   gorkov@gorkov-big-home:~/homework/diplom/terraform$ terraform plan
+   ...
+   gorkov@gorkov-big-home:~/homework/diplom/terraform$ terraform apply
+   ...
+   gorkov@gorkov-big-home:~/homework/diplom/terraform$ bash generate_inventory.sh > ../kubespray/inventory/mycluster/inventory.ini 
+   gorkov@gorkov-big-home:~/homework/diplom/terraform$ cd ../kubespray/
+   gorkov@gorkov-big-home:~/homework/diplom/kubespray$ ansible-playbook -i inventory/mycluster/inventory.ini --become cluster.yml
+   ...
+   gorkov@gorkov-big-home:~/homework/diplom/kubespray$ cd ../terraform/
+   gorkov@gorkov-big-home:~/homework/diplom/terraform$ bash get_conf.sh
+   gorkov@gorkov-big-home:~/homework/diplom/terraform$ kubectl get pods --all-namespaces
+   NAMESPACE     NAME                                       READY   STATUS    RESTARTS       AGE
+   kube-system   calico-kube-controllers-7967fb4566-6jsks   1/1     Running   0              110m
+   kube-system   calico-node-7qkgl                          1/1     Running   0              111m
+   kube-system   calico-node-d2vsv                          1/1     Running   0              111m
+   kube-system   calico-node-wk5bm                          1/1     Running   1 (111m ago)   111m
+   kube-system   coredns-68868dc95b-zvmlr                   1/1     Running   0              110m
+   kube-system   coredns-68868dc95b-zwznz                   1/1     Running   0              110m
+   kube-system   dns-autoscaler-7ccd65764f-x4nrl            1/1     Running   0              110m
+   kube-system   kube-apiserver-master-1                    1/1     Running   1              114m
+   kube-system   kube-controller-manager-master-1           1/1     Running   1              114m
+   kube-system   kube-proxy-8fbtb                           1/1     Running   0              112m
+   kube-system   kube-proxy-qxqck                           1/1     Running   0              112m
+   kube-system   kube-proxy-tb9fp                           1/1     Running   0              112m
+   kube-system   kube-scheduler-master-1                    1/1     Running   1              114m
+   kube-system   nginx-proxy-worker-1                       1/1     Running   0              111m
+   kube-system   nginx-proxy-worker-2                       1/1     Running   0              111m
+   kube-system   nodelocaldns-cnxph                         1/1     Running   0              110m
+   kube-system   nodelocaldns-qbqvw                         1/1     Running   0              110m
+   kube-system   nodelocaldns-xr88f                         1/1     Running   0              110m
+   ```
+   </details>
 
 ---
 ### Создание тестового приложения
+
+<details>
+  <summary>Задание</summary> 
 
 Для перехода к следующему этапу необходимо подготовить тестовое приложение, эмулирующее основное приложение разрабатываемое вашей компанией.
 
@@ -184,6 +190,59 @@ kube-system   nodelocaldns-xr88f                         1/1     Running   0    
 
 1. Git репозиторий с тестовым приложением и Dockerfile.
 2. Регистр с собранным docker image. В качестве регистра может быть DockerHub или [Yandex Container Registry](https://cloud.yandex.ru/services/container-registry), созданный также с помощью terraform.
+
+---
+
+</details>
+
+1. Подготовил статичный индекс [index.html](app/index.html) и докерфайл [Dockerfile](app/Dockerfile)
+2. Собрал образ `docker build -t gorkov/app .` и запушил его в докерхаб `docker push gorkov/app` 
+   <details>
+   <summary>Консоль:</summary> 
+
+   ```bash
+   gorkov@gorkov-big-home:~/homework/diplom/app$ docker build -t gorkov/app .
+   [+] Building 3.7s (8/8) FINISHED                                                                                                                                                                                                                      
+   => [internal] load build definition from Dockerfile                                                                                                                                                                                             0.1s
+   => => transferring dockerfile: 31B                                                                                                                                                                                                              0.1s
+   => [internal] load .dockerignore                                                                                                                                                                                                                0.1s
+   => => transferring context: 2B                                                                                                                                                                                                                  0.0s
+   => [internal] load metadata for docker.io/library/nginx:latest                                                                                                                                                                                  3.2s
+   => [auth] library/nginx:pull token for registry-1.docker.io                                                                                                                                                                                     0.0s
+   => CACHED [1/2] FROM docker.io/library/nginx@sha256:6650513efd1d27c1f8a5351cbd33edf85cc7e0d9d0fcb4ffb23d8fa89b601ba8                                                                                                                            0.0s
+   => [internal] load build context                                                                                                                                                                                                                0.1s
+   => => transferring context: 383B                                                                                                                                                                                                                0.1s
+   => [2/2] COPY index.html /usr/share/nginx/html/                                                                                                                                                                                                 0.1s
+   => exporting to image                                                                                                                                                                                                                           0.1s
+   => => exporting layers                                                                                                                                                                                                                          0.0s
+   => => writing image sha256:22010009993c17a4067bb63a71102e1dbaf2b59710e0fa062d4f70fe610c75df                                                                                                                                                     0.0s
+   => => naming to docker.io/gorkov/app                                                                                                                                                                                                            0.0s
+
+   Use 'docker scan' to run Snyk tests against images to find vulnerabilities and learn how to fix them
+   gorkov@gorkov-big-home:~/homework/diplom/app$ docker login -u gorkov
+   Password: 
+   Login Succeeded
+
+   Logging in with your password grants your terminal complete access to your account. 
+   For better security, log in with a limited-privilege personal access token. Learn more at https://docs.docker.com/go/access-tokens/
+   gorkov@gorkov-big-home:~/homework/diplom/app$ docker push gorkov/app
+   Using default tag: latest
+   The push refers to repository [docker.io/gorkov/app]
+   9b15d0187406: Pushed 
+   3ea1bc01cbfe: Layer already exists 
+   a76121a5b9fd: Layer already exists 
+   2df186f5be5c: Layer already exists 
+   21a95e83c568: Layer already exists 
+   81e05d8cedf6: Layer already exists 
+   4695cdfb426a: Layer already exists 
+   latest: digest: sha256:8f1be0d1cd98ab1d9a7aa555defbd15196291a6c7e394a1de40ddf6befcbe729 size: 1777
+
+   ```
+   </details>
+
+3. Регистр [https://hub.docker.com/r/gorkov/app](https://hub.docker.com/r/gorkov/app)
+
+
 
 ---
 ### Подготовка cистемы мониторинга и деплой приложения
