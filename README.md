@@ -171,7 +171,7 @@
    </details>
 
 ---
-### Создание тестового приложения
+### [Создание тестового приложения](https://github.com/DarkGarik/diplom/tree/0.3.0)
 
 <details>
   <summary>Задание</summary> 
