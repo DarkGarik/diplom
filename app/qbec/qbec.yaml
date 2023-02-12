@@ -1,0 +1,10 @@
+apiVersion: qbec.io/v1alpha1
+kind: App
+metadata:
+  name: myapp
+spec:
+  environments:
+    default:
+      defaultNamespace: stage
+      server: https://51.250.88.194:6443'
+  vars: {}

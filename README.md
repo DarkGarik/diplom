@@ -247,6 +247,10 @@
 ---
 ### Подготовка cистемы мониторинга и деплой приложения
 
+<details>
+  <summary>Задание</summary> 
+
+
 Уже должны быть готовы конфигурации для автоматического создания облачной инфраструктуры и поднятия Kubernetes кластера.  
 Теперь необходимо подготовить конфигурационные файлы для настройки нашего Kubernetes кластера.
 
@@ -267,6 +271,98 @@
 2. Http доступ к web интерфейсу grafana.
 3. Дашборды в grafana отображающие состояние Kubernetes кластера.
 4. Http доступ к тестовому приложению.
+
+---
+
+</details>
+
+1. Выбрал пакет `kube-prometheus` 
+   - установку производил по инструкции [Customizing Kube-Prometheus](https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/customizing.md)
+
+      ```bash
+      gorkov@gorkov-big-home:~/homework/diplom$ mkdir my-kube-prometheus; cd my-kube-prometheus
+      gorkov@gorkov-big-home:~/homework/diplom/my-kube-prometheus$ go install -a github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb@latest
+      gorkov@gorkov-big-home:~/homework/diplom/my-kube-prometheus$ jb init
+      gorkov@gorkov-big-home:~/homework/diplom/my-kube-prometheus$ jb install github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus@main
+      gorkov@gorkov-big-home:~/homework/diplom/my-kube-prometheus$ wget https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/example.jsonnet -O example.jsonnet
+      gorkov@gorkov-big-home:~/homework/diplom/my-kube-prometheus$ wget https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/build.sh -O build.sh
+      ```
+   - для доступа к `grafana` извне, в файле [example.jsonnet](my-kube-prometheus/example.jsonnet) раскомменитровал строку `(import 'kube-prometheus/addons/node-ports.libsonnet') +`, в файле [manifests/grafana-networkPolicy.yaml](my-kube-prometheus/manifests/grafana-networkPolicy.yaml) закомментировал блок: 
+      ```
+         - podSelector:
+         matchLabels:
+            app.kubernetes.io/name: prometheus
+      ```
+      внешний порт смотрим в файле [grafana-serviceAccount.yaml](my-kube-prometheus/manifests/grafana-serviceAccount.yaml) `nodePort: 30902` 
+   - также по [инструкции](https://github.com/prometheus-operator/kube-prometheus/blob/main/docs/customizing.md#generating) перед компиляцией манифестов устанавливаем необходимые модули `go install github.com/brancz/gojsontoyaml@latest` и `go install github.com/google/go-jsonnet/cmd/jsonnet@latest`
+   - компилируем манифесты `./build.sh example.jsonnet`
+   - Устанавливаем Prometheus и Grafana
+
+      <details>
+      <summary>Консоль</summary> 
+
+      ```bash
+      gorkov@gorkov-big-home:~/homework/diplom/my-kube-prometheus$ kubectl apply --server-side -f manifests/setup
+      gorkov@gorkov-big-home:~/homework/diplom/my-kube-prometheus$ kubectl apply -f manifests/
+      gorkov@gorkov-big-home:~/homework/diplom/my-kube-prometheus$ kubectl get -n monitoring deploy,po,svc
+      NAME                                  READY   UP-TO-DATE   AVAILABLE   AGE
+      deployment.apps/blackbox-exporter     1/1     1            1           26m
+      deployment.apps/grafana               1/1     1            1           26m
+      deployment.apps/kube-state-metrics    1/1     1            1           26m
+      deployment.apps/prometheus-adapter    2/2     2            2           26m
+      deployment.apps/prometheus-operator   1/1     1            1           28m
+
+      NAME                                      READY   STATUS    RESTARTS   AGE
+      pod/alertmanager-main-0                   2/2     Running   0          26m
+      pod/alertmanager-main-1                   2/2     Running   0          26m
+      pod/alertmanager-main-2                   2/2     Running   0          26m
+      pod/blackbox-exporter-6495c95d8f-7x7n7    3/3     Running   0          26m
+      pod/grafana-69d449b7dd-zk5qn              1/1     Running   0          26m
+      pod/kube-state-metrics-7cc68994c-fsz2w    3/3     Running   0          26m
+      pod/node-exporter-6xfhd                   2/2     Running   0          26m
+      pod/node-exporter-8wftj                   2/2     Running   0          26m
+      pod/node-exporter-d9wtm                   2/2     Running   0          26m
+      pod/prometheus-adapter-779df64887-7m8dl   1/1     Running   0          26m
+      pod/prometheus-adapter-779df64887-kmf8x   1/1     Running   0          26m
+      pod/prometheus-k8s-0                      2/2     Running   0          26m
+      pod/prometheus-k8s-1                      2/2     Running   0          26m
+      pod/prometheus-operator-8d5b96fc9-ncz76   2/2     Running   0          28m
+
+      NAME                            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+      service/alertmanager-main       NodePort    10.233.2.92     <none>        9093:30903/TCP               26m
+      service/alertmanager-operated   ClusterIP   None            <none>        9093/TCP,9094/TCP,9094/UDP   26m
+      service/blackbox-exporter       ClusterIP   10.233.5.23     <none>        9115/TCP,19115/TCP           26m
+      service/grafana                 NodePort    10.233.15.165   <none>        3000:30902/TCP               26m
+      service/kube-state-metrics      ClusterIP   None            <none>        8443/TCP,9443/TCP            26m
+      service/node-exporter           ClusterIP   None            <none>        9100/TCP                     26m
+      service/prometheus-adapter      ClusterIP   10.233.20.240   <none>        443/TCP                      26m
+      service/prometheus-k8s          NodePort    10.233.49.249   <none>        9090:30900/TCP               26m
+      service/prometheus-operated     ClusterIP   None            <none>        9090/TCP                     26m
+      service/prometheus-operator     ClusterIP   None            <none>        8443/TCP                     28m
+      ```
+      
+      </details>
+
+   -  веб интерфейс `grafana`:
+      <details>
+      <summary>Скриншоты</summary> 
+
+      ![](img/20230211230035.png)  
+      ![](img/20230211230538.png)  
+      ![](img/20230211230717.png)  
+
+      </details>
+2. Для деплоя приложения выбрал `qbec`
+   - Создал минимальный [конфиг для `qbec`](app/qbec/)
+   - Написал скрипт [genererate_qbec.sh](terraform/genererate_qbec.sh) для генерации файла [qbec.yaml](app/qbec/qbec.yaml) `gorkov@gorkov-big-home:~/homework/diplom/terraform$ bash genererate_qbec.sh > ../app/qbec/qbec.yaml`
+   - Доступ к приложение по `http`, порт `30222`
+      <details>
+      <summary>Скриншот</summary> 
+      
+      ![](img/20230212160416.png)  
+
+      </details>
+
 
 ---
 ### Установка и настройка CI/CD
