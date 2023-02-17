@@ -6,5 +6,8 @@ spec:
   environments:
     default:
       defaultNamespace: stage
-      server: https://51.250.88.194:6443'
-  vars: {}
+      server: https://51.250.14.246:6443
+  vars:
+    external:
+      - name: mytag
+        default: latest

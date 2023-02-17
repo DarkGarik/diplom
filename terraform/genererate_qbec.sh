@@ -15,7 +15,10 @@ EOF
 printf "      server: https://"
 terraform output -json instance_group_masters_public_ips | jq -j ".[1-1]"
 printf ":6443"
-printf "'\n"
+printf "\n"
 cat << EOF
-  vars: {}
+  vars:
+    external:
+      - name: tag
+        default: latest
 EOF

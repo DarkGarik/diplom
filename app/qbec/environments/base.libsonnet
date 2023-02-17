@@ -1,9 +1,10 @@
+local imageTag = std.extVar('mytag');
 {
   components: {
   "app": {
     "image": {
       "repository": "gorkov/app",
-      "tag": "latest",
+      "tag": imageTag,
       "imagePullPolicy": "Always"
     }
   }    

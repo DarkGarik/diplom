@@ -7,7 +7,7 @@ local base = import './base.libsonnet';
        "replicaCount": 1,
        "deploymentName": "myapp",
        "serviceName": "myapp",
-       "port": 8080,
+       "port": 8181,
        "targetPort": 80,
        "nodePort": 30222
      },          

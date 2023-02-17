@@ -6,17 +6,17 @@ terraform {
   }
   required_version = ">= 0.13"
 
-  # backend "s3" {
-  #   endpoint   = "storage.yandexcloud.net"
-  #   bucket     = "terraformnetologygorkov"
-  #   region     = "ru-central1"
-  #   key        = "main/terraform.tfstate"
-  #   access_key = "YCAJEwMLaCxtkRAGEKIFgrO3H"
-  #   secret_key = "YCP2leH5PnydF8xM--4oRul2ma1ViYV0klQrc6ea"
+  backend "s3" {
+    endpoint   = "storage.yandexcloud.net"
+    bucket     = "terraformnetologygorkov"
+    region     = "ru-central1"
+    key        = "main/terraform.tfstate"
+    access_key = "YCAJE5d3uMC3X1NVcGUKIcZoq"
+    secret_key = "YCMJa_Qf29AA414DhbJcidqNnTGxbF9yI7egqcMV"
 
-  #   skip_region_validation      = true
-  #   skip_credentials_validation = true
-  # }
+    skip_region_validation      = true
+    skip_credentials_validation = true
+  }
 }
 
 provider "yandex" {

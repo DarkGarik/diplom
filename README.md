@@ -1,6 +1,7 @@
 # Дипломный практикум в Yandex.Cloud
 - [Дипломный практикум в Yandex.Cloud](#дипломный-практикум-в-yandexcloud)
   - [Цели:](#цели)
+  - [Доступы:](#доступы)
   - [Этапы выполнения:](#этапы-выполнения)
     - [Создание облачной инфраструктуры](#создание-облачной-инфраструктуры)
     - [Создание Kubernetes кластера](#создание-kubernetes-кластера)
@@ -19,6 +20,12 @@
 4. Настроить и автоматизировать сборку тестового приложения с использованием Docker-контейнеров.
 5. Настроить CI для автоматической сборки и тестирования.
 6. Настроить CD для автоматического развёртывания приложения.
+
+---
+## Доступы:
+1. [Тестовое приложение](http://51.250.14.246:30222/)
+2. [Grafana](http://51.250.14.246:30902/d/alertmanager-overview/alertmanager-overview?orgId=1&refresh=30s) admin:12365478
+3. [Jenkins](http://130.193.38.209:8080/) admin:12365478
 
 ---
 ## Этапы выполнения:
@@ -355,6 +362,8 @@
 2. Для деплоя приложения выбрал `qbec`
    - Создал минимальный [конфиг для `qbec`](app/qbec/)
    - Написал скрипт [genererate_qbec.sh](terraform/genererate_qbec.sh) для генерации файла [qbec.yaml](app/qbec/qbec.yaml) `gorkov@gorkov-big-home:~/homework/diplom/terraform$ bash genererate_qbec.sh > ../app/qbec/qbec.yaml`
+   - Создаем неймспейс stage `kubectl create ns stage`
+   - Деплой `qbec validate default` `qbec apply default`
    - Доступ к приложение по `http`, порт `30222`
       <details>
       <summary>Скриншот</summary> 
@@ -366,6 +375,9 @@
 
 ---
 ### Установка и настройка CI/CD
+
+<details>
+  <summary>Задание</summary> 
 
 Осталось настроить ci/cd систему для автоматической сборки docker image и деплоя приложения при изменении кода.
 
@@ -381,6 +393,77 @@
 1. Интерфейс ci/cd сервиса доступен по http.
 2. При любом коммите в репозиторие с тестовым приложением происходит сборка и отправка в регистр Docker образа.
 3. При создании тега (например, v1.0.0) происходит сборка и отправка с соответствующим label в регистр, а также деплой соответствующего Docker образа в кластер Kubernetes.
+
+---
+
+</details>
+
+1. Выбрал `Jenkins`
+   - Приложение перенес в отдельный [репозиторий](https://github.com/DarkGarik/myapp)
+   - Написал скрипт [generate_hosts.sh](terraform/generate_hosts.sh) для генерации файла [hosts.yml](infrastructure-jenkins/inventory/cicd/hosts.yml)  запуск: `gorkov@gorkov-big-home:~/homework/diplom/terraform$ bash generate_hosts.sh > ../infrastructure-jenkins/inventory/cicd/hosts.yml`
+   - Собрал `jenkins` с помощью [ansible](infrastructure-jenkins), `gorkov@gorkov-big-home:~/homework/diplom/infrastructure-jenkins$ ansible-playbook -i inventory/cicd/hosts.yml site.yml`
+   - В `Jenkins`: 
+      - Добавил агента:
+         <details>
+         <summary>Скриншот</summary> 
+
+         ![](img/20230217211639.png)  
+         </details>
+      - Добавил секреты:
+         <details>
+         <summary>Скриншот</summary> 
+         
+         ![](img/20230217212051.png)  
+         </details>
+      - Добавил плагин [docker-workflow](https://plugins.jenkins.io/docker-workflow/)
+      - Добавил Multibranch Pipeline
+         <details>
+         <summary>Скриншот</summary> 
+
+         ![](img/20230217212619.png)  
+         </details>
+    - В репозиторий с приложением положил [`Jenkinsfile`](https://github.com/DarkGarik/myapp/blob/master/Jenkinsfile) 
+       <details>
+       <summary>Содержание</summary> 
+
+      ```
+      node {
+      registry = "gorkov/app"
+      stage ('Clone'){
+         git branch: 'master', credentialsId: 'cfe4e7b8-1238-49bd-aac5-db6ac2441c8d', url: 'git@github.com:DarkGarik/myapp.git'
+      }
+      stage ('build'){
+         if (env.TAG_NAME) {
+            tag = "${env.TAG_NAME}"
+         } else {
+            tag = "${env.BUILD_NUMBER}"
+         }
+         myApp = docker.build "$registry:$tag"
+      }
+      stage ('push'){
+         docker.withRegistry('', 'docker') {
+            myApp.push()
+         }
+      }
+      stage ('deploy'){
+         if (env.TAG_NAME) {
+            dir("qbec") {
+            sh "qbec apply default --vm:ext-str mytag=$tag --yes"
+            }
+         }
+      }
+      }
+
+      ```
+       </details>
+   - В итоге имеем сборку по веткам и по тегам, при любом комите без тега происходит сборка и отправка в регистр докера, при появлении тэга, делается сборка, пуш в докер и деплой в кубер
+      <details>
+      <summary>Скриншоты</summary> 
+
+      ![](img/20230217214133.png)  
+      ![](img/20230217214206.png)  
+      ![](img/20230217214822.png)  
+      </details>
 
 ---
 ## Что необходимо для сдачи задания?
