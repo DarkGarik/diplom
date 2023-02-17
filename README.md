@@ -374,7 +374,7 @@
 
 
 ---
-### Установка и настройка CI/CD
+### [Установка и настройка CI/CD](https://github.com/DarkGarik/diplom/tree/0.5.0)
 
 <details>
   <summary>Задание</summary> 
