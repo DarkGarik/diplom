@@ -34,6 +34,7 @@ resource "yandex_storage_bucket" "test" {
     access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key
     secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
     bucket     = "terraformnetologygorkov"
+    force_destroy = true
 }
 
 # resource "local_file" "access_key" {
